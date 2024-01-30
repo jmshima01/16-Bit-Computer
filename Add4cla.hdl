@@ -15,7 +15,7 @@ CHIP Add4cla {
     And(a=a[3],b=b[3],out=G3);
 
 
-    //C1:f
+    //C1:
     And(a=cin, b=P0, out=C1-1);
     Or(a=G0, b=C1-1, out=C1);
     
