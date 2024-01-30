@@ -1,0 +1,114 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/Add16.hdl
+/**
+ * 16-bit adder: Adds two 16-bit two's complement values.
+ * The most significant carry bit is ignored.
+ */
+CHIP Add16 {
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+
+    //// calc carrys for carry lookahead...
+    Not(in=true, out=c_in);
+
+    Xor(a=a[0],b=b[0],out=P0);
+    And(a=a[0],b=b[0],out=G0);
+    Xor(a=a[1],b=b[1],out=P1);
+    And(a=a[1],b=b[1],out=G1);
+    Xor(a=a[2],b=b[2],out=P2);
+    And(a=a[2],b=b[2],out=G2);
+    Xor(a=a[3],b=b[3],out=P3);
+    And(a=a[3],b=b[3],out=G3);
+    Xor(a=a[4],b=b[4],out=P4);
+    And(a=a[4],b=b[4],out=G4);
+    Xor(a=a[5],b=b[5],out=P5);
+    And(a=a[5],b=b[5],out=G5);
+    Xor(a=a[6],b=b[6],out=P6);
+    And(a=a[6],b=b[6],out=G6);
+    Xor(a=a[7],b=b[7],out=P7);
+    And(a=a[7],b=b[7],out=G7);
+    Xor(a=a[8],b=b[8],out=P8);
+    And(a=a[8],b=b[8],out=G8);
+    Xor(a=a[9],b=b[9],out=P9);
+    And(a=a[9],b=b[9],out=G9);
+    Xor(a=a[10],b=b[10],out=P10);
+    And(a=a[10],b=b[10],out=G10);
+    Xor(a=a[11],b=b[11],out=P11);
+    And(a=a[11],b=b[11],out=G11);
+    Xor(a=a[12],b=b[12],out=P12);
+    And(a=a[12],b=b[12],out=G12);
+    Xor(a=a[13],b=b[13],out=P13);
+    And(a=a[13],b=b[13],out=G13);
+    Xor(a=a[14],b=b[14],out=P14);
+    And(a=a[14],b=b[14],out=G14);
+    Xor(a=a[15],b=b[15],out=P15);
+    And(a=a[15],b=b[15],out=G15);
+
+    //C1:
+    And(a=c_in, b=P0, out=C1_1);
+    Or(a=G0, b=C1_1, out=C1);
+    
+    //C2:
+    //// P1 P0 cin
+    And(a=c_in, b=P0, out=C2_1);
+    And(a=P1, b=C2_1, out=C2_2);
+ 
+    And(a=G0, b=P1, out=C2_3);
+    
+    Or(a=C2_3,b=C2_2,out=C2_4);
+    Or(a=G1, b=C2_4, out=C2);
+
+
+    //C3:
+    And(a=c_in, b=P0, out=C3_1);
+    And(a=P1, b=P2, out=C3_2);
+    And(a=C3_2, b=C3_1, out=C3_3); //*
+
+    And(a=P1, b=P2, out=C3_4);
+    And(a=G0, b=C3_4, out=C3_5);//*
+
+    And(a=G1, b=P2, out=C3_6);//*
+
+    Or(a=C3_3, b=C3_5, out=C3_7);
+    Or(a=C3_6, b=C3_7, out=C3_8);
+    Or(a=G2, b=C3_8, out=C3);
+
+    
+    //C4:
+    And(a=c_in, b=P0, out=C4_1);
+    And(a=P1, b=P2, out=C4_2);
+    And(a=C4_2, b=C4_1, out=C4_3); 
+    And(a=C4_3, b=P3, out=C4_4); //*
+
+    And(a=P1, b=P2, out=C4_5);
+    And(a=G0, b=P3, out=C4_6);
+    And(a=C4_5, b=C4_6, out=C4_7); //*
+
+    And(a=G1, b=P3, out=C4_8);
+    And(a=C4_8, b=P2, out=C4_9);//*
+
+    And(a=G2,b=P3,out=C4_10)//*
+
+    Or(a=C4_10, b=C4_9, out=C4_11);
+    Or(a=C4_4, b=C4_7, out=C4_12);
+    Or(a=C4_11, b=C4_12, out=C4_13);
+    Or(a=G3, b=C4_13, out=C4);
+
+
+    // FullAdder(a=a[0], b=b[0], c=C1, sum=out[0], carry=false)
+    // FullAdder(a=a[1], b=b[1], c=C2, sum=out[1], carry=false)
+    // FullAdder(a=a[2], b=b[2], c=C3, sum=out[2], carry=false)
+    // FullAdder(a=a[3], b=b[3], c=C4, sum=out[3], carry=false)
+    
+
+
+
+
+
+
+    
+}

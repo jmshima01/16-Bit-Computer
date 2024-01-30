@@ -1,0 +1,73 @@
+CHIP Add4cla {
+    IN a[4], b[4], cin;
+    OUT out[4], cout;
+
+    PARTS:
+    //// calc carrys for carry lookahead...
+
+    Xor(a=a[0],b=b[0],out=P0);
+    And(a=a[0],b=b[0],out=G0);
+    Xor(a=a[1],b=b[1],out=P1);
+    And(a=a[1],b=b[1],out=G1);
+    Xor(a=a[2],b=b[2],out=P2);
+    And(a=a[2],b=b[2],out=G2);
+    Xor(a=a[3],b=b[3],out=P3);
+    And(a=a[3],b=b[3],out=G3);
+
+
+    //C1:f
+    And(a=cin, b=P0, out=C1-1);
+    Or(a=G0, b=C1-1, out=C1);
+    
+    //C2:
+    //// P1 P0 cin
+    And(a=cin, b=P0, out=C2-1);
+    And(a=P1, b=C2-1, out=C2-2);
+ 
+    And(a=G0, b=P1, out=C2-3);
+    
+    Or(a=C2-3,b=C2-2,out=C2-4);
+    Or(a=G1, b=C2-4, out=C2);
+
+
+    //C3:
+    And(a=cin, b=P0, out=C3-1);
+    And(a=P1, b=P2, out=C3-2);
+    And(a=C3-2, b=C3-1, out=C3-3); //*
+
+    And(a=P1, b=P2, out=C3-4);
+    And(a=G0, b=C3-4, out=C3-5);//*
+
+    And(a=G1, b=P2, out=C3-6);//*
+
+    Or(a=C3-3, b=C3-5, out=C3-7);
+    Or(a=C3-6, b=C3-7, out=C3-8);
+    Or(a=G2, b=C3-8, out=C3);
+
+    
+    //C4:
+    And(a=cin, b=P0, out=C4-1);
+    And(a=P1, b=P2, out=C4-2);
+    And(a=C4-2, b=C4-1, out=C4-3); 
+    And(a=C4-3, b=P3, out=C4-4); //*
+
+    And(a=P1, b=P2, out=C4-5);
+    And(a=G0, b=P3, out=C4-6);
+    And(a=C4-5, b=C4-6, out=C4-7); //*
+
+    And(a=G1, b=P3, out=C4-8);
+    And(a=C4-8, b=P2, out=C4-9);//*
+
+    And(a=G2,b=P3,out=C4-10);//*
+
+    Or(a=C4-10, b=C4-9, out=C4-11);
+    Or(a=C4-4, b=C4-7, out=C4-12);
+    Or(a=C4-11, b=C4-12, out=C4-13);
+    Or(a=G3, b=C4-13, out=C4);
+
+
+    FullAdder(a=a[0], b=b[0], c=false, sum=out[0], carry=false);
+    FullAdder(a=a[1], b=b[1], c=C1, sum=out[1], carry=false);
+    FullAdder(a=a[2], b=b[2], c=C2, sum=out[2], carry=false);
+    FullAdder(a=a[3], b=b[3], c=C3, sum=out[3], carry=cout);
+}
