@@ -11,8 +11,8 @@ CHIP Add16 {
     OUT out[16];
 
     PARTS:
+    // CARRY LOOK AHEAD ADDER
     Not(in=true, out=Cin); // no cin :( this will do
-
     Xor(a=a[0],b=b[0],out=P0);
     And(a=a[0],b=b[0],out=G0);
     Xor(a=a[1],b=b[1],out=P1);
@@ -293,7 +293,10 @@ CHIP Add16 {
     //('G7', 'P8')
     And(a=G7,b=P8,out=C9-0);
 
-    //('G6', 'P8', 'P7')Add16.tst
+    //('G6', 'P8', 'P7')
+    And(a=G6,b=P8,out=C9-1);
+    And(a=P7,b=C9-1,out=C9-2);
+
     //('G5', 'P8', 'P7', 'P6')
     And(a=G5,b=P8,out=C9-3);
     And(a=P7,b=C9-3,out=C9-4);
@@ -1128,4 +1131,5 @@ CHIP Add16 {
     FullAdder(a=a[13], b=b[13], c=C13, sum=out[13], carry=false);
     FullAdder(a=a[14], b=b[14], c=C14, sum=out[14], carry=false);
     FullAdder(a=a[15], b=b[15], c=C15, sum=out[15], carry=C16);
+
 }
