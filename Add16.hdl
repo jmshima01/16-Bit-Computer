@@ -11,8 +11,7 @@ CHIP Add16 {
     OUT out[16];
 
     PARTS:
-
-    //// calc carrys for carry lookahead...
+    Not(in=true, out=Cin); // no cin :( this will do
 
     Xor(a=a[0],b=b[0],out=P0);
     And(a=a[0],b=b[0],out=G0);
@@ -46,60 +45,1073 @@ CHIP Add16 {
     And(a=a[14],b=b[14],out=G14);
     Xor(a=a[15],b=b[15],out=P15);
     And(a=a[15],b=b[15],out=G15);
-
-  
     //C1:
-    And(a=cin, b=P0, out=C1-1);
-    Or(a=G0, b=C1-1, out=C1);
-    
+    //('Cin', 'P0')
+    And(a=Cin,b=P0,out=C1-0);
+
+    //('C1-0', 'G0')
+    Or(a=C1-0,b=G0,out=C1);
     //C2:
-    //// P1 P0 cin
-    And(a=cin, b=P0, out=C2-1);
-    And(a=P1, b=C2-1, out=C2-2);
- 
-    And(a=G0, b=P1, out=C2-3);
-    
-    Or(a=C2-3,b=C2-2,out=C2-4);
-    Or(a=G1, b=C2-4, out=C2);
+    //('G0', 'P1')
+    And(a=G0,b=P1,out=C2-0);
 
+    //('Cin', 'P1', 'P0')
+    And(a=Cin,b=P1,out=C2-1);
+    And(a=P0,b=C2-1,out=C2-2);
 
+    //('C2-0', 'C2-2', 'G1')
+    Or(a=C2-0,b=C2-2,out=C2-3);
+    Or(a=G1,b=C2-3,out=C2);
     //C3:
-    And(a=cin, b=P0, out=C3-1);
-    And(a=P1, b=P2, out=C3-2);
-    And(a=C3-2, b=C3-1, out=C3-3); //*
+    //('G1', 'P2')
+    And(a=G1,b=P2,out=C3-0);
 
-    And(a=P1, b=P2, out=C3-4);
-    And(a=G0, b=C3-4, out=C3-5);//*
+    //('G0', 'P2', 'P1')
+    And(a=G0,b=P2,out=C3-1);
+    And(a=P1,b=C3-1,out=C3-2);
 
-    And(a=G1, b=P2, out=C3-6);//*
+    //('Cin', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P2,out=C3-3);
+    And(a=P1,b=C3-3,out=C3-4);
+    And(a=P0,b=C3-4,out=C3-5);
 
-    Or(a=C3-3, b=C3-5, out=C3-7);
-    Or(a=C3-6, b=C3-7, out=C3-8);
-    Or(a=G2, b=C3-8, out=C3);
-
-    
+    //('C3-0', 'C3-2', 'C3-5', 'G2')
+    Or(a=C3-0,b=C3-2,out=C3-6);
+    Or(a=C3-5,b=C3-6,out=C3-7);
+    Or(a=G2,b=C3-7,out=C3);
     //C4:
-    And(a=cin, b=P0, out=C4-1);
-    And(a=P1, b=P2, out=C4-2);
-    And(a=C4-2, b=C4-1, out=C4-3); 
-    And(a=C4-3, b=P3, out=C4-4); //*
+    //('G2', 'P3')
+    And(a=G2,b=P3,out=C4-0);
 
-    And(a=P1, b=P2, out=C4-5);
-    And(a=G0, b=P3, out=C4-6);
-    And(a=C4-5, b=C4-6, out=C4-7); //*
+    //('G1', 'P3', 'P2')
+    And(a=G1,b=P3,out=C4-1);
+    And(a=P2,b=C4-1,out=C4-2);
 
-    And(a=G1, b=P3, out=C4-8);
-    And(a=C4-8, b=P2, out=C4-9);//*
+    //('G0', 'P3', 'P2', 'P1')
+    And(a=G0,b=P3,out=C4-3);
+    And(a=P2,b=C4-3,out=C4-4);
+    And(a=P1,b=C4-4,out=C4-5);
 
-    And(a=G2,b=P3,out=C4-10);//*
+    //('Cin', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P3,out=C4-6);
+    And(a=P2,b=C4-6,out=C4-7);
+    And(a=P1,b=C4-7,out=C4-8);
+    And(a=P0,b=C4-8,out=C4-9);
 
-    Or(a=C4-10, b=C4-9, out=C4-11);
-    Or(a=C4-4, b=C4-7, out=C4-12);
-    Or(a=C4-11, b=C4-12, out=C4-13);
-    Or(a=G3, b=C4-13, out=C4);
+    //('C4-0', 'C4-2', 'C4-5', 'C4-9', 'G3')
+    Or(a=C4-0,b=C4-2,out=C4-10);
+    Or(a=C4-5,b=C4-10,out=C4-11);
+    Or(a=C4-9,b=C4-11,out=C4-12);
+    Or(a=G3,b=C4-12,out=C4);
+    //C5:
+    //('G3', 'P4')
+    And(a=G3,b=P4,out=C5-0);
 
-    //C5
+    //('G2', 'P4', 'P3')
+    And(a=G2,b=P4,out=C5-1);
+    And(a=P3,b=C5-1,out=C5-2);
 
+    //('G1', 'P4', 'P3', 'P2')
+    And(a=G1,b=P4,out=C5-3);
+    And(a=P3,b=C5-3,out=C5-4);
+    And(a=P2,b=C5-4,out=C5-5);
+
+    //('G0', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P4,out=C5-6);
+    And(a=P3,b=C5-6,out=C5-7);
+    And(a=P2,b=C5-7,out=C5-8);
+    And(a=P1,b=C5-8,out=C5-9);
+
+    //('Cin', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P4,out=C5-10);
+    And(a=P3,b=C5-10,out=C5-11);
+    And(a=P2,b=C5-11,out=C5-12);
+    And(a=P1,b=C5-12,out=C5-13);
+    And(a=P0,b=C5-13,out=C5-14);
+
+    //('C5-0', 'C5-2', 'C5-5', 'C5-9', 'C5-14', 'G4')
+    Or(a=C5-0,b=C5-2,out=C5-15);
+    Or(a=C5-5,b=C5-15,out=C5-16);
+    Or(a=C5-9,b=C5-16,out=C5-17);
+    Or(a=C5-14,b=C5-17,out=C5-18);
+    Or(a=G4,b=C5-18,out=C5);
+    //C6:
+    //('G4', 'P5')
+    And(a=G4,b=P5,out=C6-0);
+
+    //('G3', 'P5', 'P4')
+    And(a=G3,b=P5,out=C6-1);
+    And(a=P4,b=C6-1,out=C6-2);
+
+    //('G2', 'P5', 'P4', 'P3')
+    And(a=G2,b=P5,out=C6-3);
+    And(a=P4,b=C6-3,out=C6-4);
+    And(a=P3,b=C6-4,out=C6-5);
+
+    //('G1', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P5,out=C6-6);
+    And(a=P4,b=C6-6,out=C6-7);
+    And(a=P3,b=C6-7,out=C6-8);
+    And(a=P2,b=C6-8,out=C6-9);
+
+    //('G0', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P5,out=C6-10);
+    And(a=P4,b=C6-10,out=C6-11);
+    And(a=P3,b=C6-11,out=C6-12);
+    And(a=P2,b=C6-12,out=C6-13);
+    And(a=P1,b=C6-13,out=C6-14);
+
+    //('Cin', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P5,out=C6-15);
+    And(a=P4,b=C6-15,out=C6-16);
+    And(a=P3,b=C6-16,out=C6-17);
+    And(a=P2,b=C6-17,out=C6-18);
+    And(a=P1,b=C6-18,out=C6-19);
+    And(a=P0,b=C6-19,out=C6-20);
+
+    //('C6-0', 'C6-2', 'C6-5', 'C6-9', 'C6-14', 'C6-20', 'G5')
+    Or(a=C6-0,b=C6-2,out=C6-21);
+    Or(a=C6-5,b=C6-21,out=C6-22);
+    Or(a=C6-9,b=C6-22,out=C6-23);
+    Or(a=C6-14,b=C6-23,out=C6-24);
+    Or(a=C6-20,b=C6-24,out=C6-25);
+    Or(a=G5,b=C6-25,out=C6);
+    //C7:
+    //('G5', 'P6')
+    And(a=G5,b=P6,out=C7-0);
+
+    //('G4', 'P6', 'P5')
+    And(a=G4,b=P6,out=C7-1);
+    And(a=P5,b=C7-1,out=C7-2);
+
+    //('G3', 'P6', 'P5', 'P4')
+    And(a=G3,b=P6,out=C7-3);
+    And(a=P5,b=C7-3,out=C7-4);
+    And(a=P4,b=C7-4,out=C7-5);
+
+    //('G2', 'P6', 'P5', 'P4', 'P3')
+    And(a=G2,b=P6,out=C7-6);
+    And(a=P5,b=C7-6,out=C7-7);
+    And(a=P4,b=C7-7,out=C7-8);
+    And(a=P3,b=C7-8,out=C7-9);
+
+    //('G1', 'P6', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P6,out=C7-10);
+    And(a=P5,b=C7-10,out=C7-11);
+    And(a=P4,b=C7-11,out=C7-12);
+    And(a=P3,b=C7-12,out=C7-13);
+    And(a=P2,b=C7-13,out=C7-14);
+
+    //('G0', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P6,out=C7-15);
+    And(a=P5,b=C7-15,out=C7-16);
+    And(a=P4,b=C7-16,out=C7-17);
+    And(a=P3,b=C7-17,out=C7-18);
+    And(a=P2,b=C7-18,out=C7-19);
+    And(a=P1,b=C7-19,out=C7-20);
+
+    //('Cin', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P6,out=C7-21);
+    And(a=P5,b=C7-21,out=C7-22);
+    And(a=P4,b=C7-22,out=C7-23);
+    And(a=P3,b=C7-23,out=C7-24);
+    And(a=P2,b=C7-24,out=C7-25);
+    And(a=P1,b=C7-25,out=C7-26);
+    And(a=P0,b=C7-26,out=C7-27);
+
+    //('C7-0', 'C7-2', 'C7-5', 'C7-9', 'C7-14', 'C7-20', 'C7-27', 'G6')
+    Or(a=C7-0,b=C7-2,out=C7-28);
+    Or(a=C7-5,b=C7-28,out=C7-29);
+    Or(a=C7-9,b=C7-29,out=C7-30);
+    Or(a=C7-14,b=C7-30,out=C7-31);
+    Or(a=C7-20,b=C7-31,out=C7-32);
+    Or(a=C7-27,b=C7-32,out=C7-33);
+    Or(a=G6,b=C7-33,out=C7);
+    //C8:
+    //('G6', 'P7')
+    And(a=G6,b=P7,out=C8-0);
+
+    //('G5', 'P7', 'P6')
+    And(a=G5,b=P7,out=C8-1);
+    And(a=P6,b=C8-1,out=C8-2);
+
+    //('G4', 'P7', 'P6', 'P5')
+    And(a=G4,b=P7,out=C8-3);
+    And(a=P6,b=C8-3,out=C8-4);
+    And(a=P5,b=C8-4,out=C8-5);
+
+    //('G3', 'P7', 'P6', 'P5', 'P4')
+    And(a=G3,b=P7,out=C8-6);
+    And(a=P6,b=C8-6,out=C8-7);
+    And(a=P5,b=C8-7,out=C8-8);
+    And(a=P4,b=C8-8,out=C8-9);
+
+    //('G2', 'P7', 'P6', 'P5', 'P4', 'P3')
+    And(a=G2,b=P7,out=C8-10);
+    And(a=P6,b=C8-10,out=C8-11);
+    And(a=P5,b=C8-11,out=C8-12);
+    And(a=P4,b=C8-12,out=C8-13);
+    And(a=P3,b=C8-13,out=C8-14);
+
+    //('G1', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P7,out=C8-15);
+    And(a=P6,b=C8-15,out=C8-16);
+    And(a=P5,b=C8-16,out=C8-17);
+    And(a=P4,b=C8-17,out=C8-18);
+    And(a=P3,b=C8-18,out=C8-19);
+    And(a=P2,b=C8-19,out=C8-20);
+
+    //('G0', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P7,out=C8-21);
+    And(a=P6,b=C8-21,out=C8-22);
+    And(a=P5,b=C8-22,out=C8-23);
+    And(a=P4,b=C8-23,out=C8-24);
+    And(a=P3,b=C8-24,out=C8-25);
+    And(a=P2,b=C8-25,out=C8-26);
+    And(a=P1,b=C8-26,out=C8-27);
+
+    //('Cin', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P7,out=C8-28);
+    And(a=P6,b=C8-28,out=C8-29);
+    And(a=P5,b=C8-29,out=C8-30);
+    And(a=P4,b=C8-30,out=C8-31);
+    And(a=P3,b=C8-31,out=C8-32);
+    And(a=P2,b=C8-32,out=C8-33);
+    And(a=P1,b=C8-33,out=C8-34);
+    And(a=P0,b=C8-34,out=C8-35);
+
+    //('C8-0', 'C8-2', 'C8-5', 'C8-9', 'C8-14', 'C8-20', 'C8-27', 'C8-35', 'G7')
+    Or(a=C8-0,b=C8-2,out=C8-36);
+    Or(a=C8-5,b=C8-36,out=C8-37);
+    Or(a=C8-9,b=C8-37,out=C8-38);
+    Or(a=C8-14,b=C8-38,out=C8-39);
+    Or(a=C8-20,b=C8-39,out=C8-40);
+    Or(a=C8-27,b=C8-40,out=C8-41);
+    Or(a=C8-35,b=C8-41,out=C8-42);
+    Or(a=G7,b=C8-42,out=C8);
+    //C9:
+    //('G7', 'P8')
+    And(a=G7,b=P8,out=C9-0);
+
+    //('G6', 'P8', 'P7')Add16.tst
+    //('G5', 'P8', 'P7', 'P6')
+    And(a=G5,b=P8,out=C9-3);
+    And(a=P7,b=C9-3,out=C9-4);
+    And(a=P6,b=C9-4,out=C9-5);
+
+    //('G4', 'P8', 'P7', 'P6', 'P5')
+    And(a=G4,b=P8,out=C9-6);
+    And(a=P7,b=C9-6,out=C9-7);
+    And(a=P6,b=C9-7,out=C9-8);
+    And(a=P5,b=C9-8,out=C9-9);
+
+    //('G3', 'P8', 'P7', 'P6', 'P5', 'P4')
+    And(a=G3,b=P8,out=C9-10);
+    And(a=P7,b=C9-10,out=C9-11);
+    And(a=P6,b=C9-11,out=C9-12);
+    And(a=P5,b=C9-12,out=C9-13);
+    And(a=P4,b=C9-13,out=C9-14);
+
+    //('G2', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3')
+    And(a=G2,b=P8,out=C9-15);
+    And(a=P7,b=C9-15,out=C9-16);
+    And(a=P6,b=C9-16,out=C9-17);
+    And(a=P5,b=C9-17,out=C9-18);
+    And(a=P4,b=C9-18,out=C9-19);
+    And(a=P3,b=C9-19,out=C9-20);
+
+    //('G1', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P8,out=C9-21);
+    And(a=P7,b=C9-21,out=C9-22);
+    And(a=P6,b=C9-22,out=C9-23);
+    And(a=P5,b=C9-23,out=C9-24);
+    And(a=P4,b=C9-24,out=C9-25);
+    And(a=P3,b=C9-25,out=C9-26);
+    And(a=P2,b=C9-26,out=C9-27);
+
+    //('G0', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P8,out=C9-28);
+    And(a=P7,b=C9-28,out=C9-29);
+    And(a=P6,b=C9-29,out=C9-30);
+    And(a=P5,b=C9-30,out=C9-31);
+    And(a=P4,b=C9-31,out=C9-32);
+    And(a=P3,b=C9-32,out=C9-33);
+    And(a=P2,b=C9-33,out=C9-34);
+    And(a=P1,b=C9-34,out=C9-35);
+
+    //('Cin', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P8,out=C9-36);
+    And(a=P7,b=C9-36,out=C9-37);
+    And(a=P6,b=C9-37,out=C9-38);
+    And(a=P5,b=C9-38,out=C9-39);
+    And(a=P4,b=C9-39,out=C9-40);
+    And(a=P3,b=C9-40,out=C9-41);
+    And(a=P2,b=C9-41,out=C9-42);
+    And(a=P1,b=C9-42,out=C9-43);
+    And(a=P0,b=C9-43,out=C9-44);
+
+    //('C9-0', 'C9-2', 'C9-5', 'C9-9', 'C9-14', 'C9-20', 'C9-27', 'C9-35', 'C9-44', 'G8')
+    Or(a=C9-0,b=C9-2,out=C9-45);
+    Or(a=C9-5,b=C9-45,out=C9-46);
+    Or(a=C9-9,b=C9-46,out=C9-47);
+    Or(a=C9-14,b=C9-47,out=C9-48);
+    Or(a=C9-20,b=C9-48,out=C9-49);
+    Or(a=C9-27,b=C9-49,out=C9-50);
+    Or(a=C9-35,b=C9-50,out=C9-51);
+    Or(a=C9-44,b=C9-51,out=C9-52);
+    Or(a=G8,b=C9-52,out=C9);
+    //C10:
+    //('G8', 'P9')
+    And(a=G8,b=P9,out=C10-0);
+
+    //('G7', 'P9', 'P8')
+    And(a=G7,b=P9,out=C10-1);
+    And(a=P8,b=C10-1,out=C10-2);
+
+    //('G6', 'P9', 'P8', 'P7')
+    And(a=G6,b=P9,out=C10-3);
+    And(a=P8,b=C10-3,out=C10-4);
+    And(a=P7,b=C10-4,out=C10-5);
+
+    //('G5', 'P9', 'P8', 'P7', 'P6')
+    And(a=G5,b=P9,out=C10-6);
+    And(a=P8,b=C10-6,out=C10-7);
+    And(a=P7,b=C10-7,out=C10-8);
+    And(a=P6,b=C10-8,out=C10-9);
+
+    //('G4', 'P9', 'P8', 'P7', 'P6', 'P5')
+    And(a=G4,b=P9,out=C10-10);
+    And(a=P8,b=C10-10,out=C10-11);
+    And(a=P7,b=C10-11,out=C10-12);
+    And(a=P6,b=C10-12,out=C10-13);
+    And(a=P5,b=C10-13,out=C10-14);
+
+    //('G3', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4')
+    And(a=G3,b=P9,out=C10-15);
+    And(a=P8,b=C10-15,out=C10-16);
+    And(a=P7,b=C10-16,out=C10-17);
+    And(a=P6,b=C10-17,out=C10-18);
+    And(a=P5,b=C10-18,out=C10-19);
+    And(a=P4,b=C10-19,out=C10-20);
+
+    //('G2', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3')
+    And(a=G2,b=P9,out=C10-21);
+    And(a=P8,b=C10-21,out=C10-22);
+    And(a=P7,b=C10-22,out=C10-23);
+    And(a=P6,b=C10-23,out=C10-24);
+    And(a=P5,b=C10-24,out=C10-25);
+    And(a=P4,b=C10-25,out=C10-26);
+    And(a=P3,b=C10-26,out=C10-27);
+
+    //('G1', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P9,out=C10-28);
+    And(a=P8,b=C10-28,out=C10-29);
+    And(a=P7,b=C10-29,out=C10-30);
+    And(a=P6,b=C10-30,out=C10-31);
+    And(a=P5,b=C10-31,out=C10-32);
+    And(a=P4,b=C10-32,out=C10-33);
+    And(a=P3,b=C10-33,out=C10-34);
+    And(a=P2,b=C10-34,out=C10-35);
+
+    //('G0', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P9,out=C10-36);
+    And(a=P8,b=C10-36,out=C10-37);
+    And(a=P7,b=C10-37,out=C10-38);
+    And(a=P6,b=C10-38,out=C10-39);
+    And(a=P5,b=C10-39,out=C10-40);
+    And(a=P4,b=C10-40,out=C10-41);
+    And(a=P3,b=C10-41,out=C10-42);
+    And(a=P2,b=C10-42,out=C10-43);
+    And(a=P1,b=C10-43,out=C10-44);
+
+    //('Cin', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P9,out=C10-45);
+    And(a=P8,b=C10-45,out=C10-46);
+    And(a=P7,b=C10-46,out=C10-47);
+    And(a=P6,b=C10-47,out=C10-48);
+    And(a=P5,b=C10-48,out=C10-49);
+    And(a=P4,b=C10-49,out=C10-50);
+    And(a=P3,b=C10-50,out=C10-51);
+    And(a=P2,b=C10-51,out=C10-52);
+    And(a=P1,b=C10-52,out=C10-53);
+    And(a=P0,b=C10-53,out=C10-54);
+
+    //('C10-0', 'C10-2', 'C10-5', 'C10-9', 'C10-14', 'C10-20', 'C10-27', 'C10-35', 'C10-44', 'C10-54', 'G9')
+    Or(a=C10-0,b=C10-2,out=C10-55);
+    Or(a=C10-5,b=C10-55,out=C10-56);
+    Or(a=C10-9,b=C10-56,out=C10-57);
+    Or(a=C10-14,b=C10-57,out=C10-58);
+    Or(a=C10-20,b=C10-58,out=C10-59);
+    Or(a=C10-27,b=C10-59,out=C10-60);
+    Or(a=C10-35,b=C10-60,out=C10-61);
+    Or(a=C10-44,b=C10-61,out=C10-62);
+    Or(a=C10-54,b=C10-62,out=C10-63);
+    Or(a=G9,b=C10-63,out=C10);
+    //C11:
+    //('G9', 'P10')
+    And(a=G9,b=P10,out=C11-0);
+
+    //('G8', 'P10', 'P9')
+    And(a=G8,b=P10,out=C11-1);
+    And(a=P9,b=C11-1,out=C11-2);
+
+    //('G7', 'P10', 'P9', 'P8')
+    And(a=G7,b=P10,out=C11-3);
+    And(a=P9,b=C11-3,out=C11-4);
+    And(a=P8,b=C11-4,out=C11-5);
+
+    //('G6', 'P10', 'P9', 'P8', 'P7')
+    And(a=G6,b=P10,out=C11-6);
+    And(a=P9,b=C11-6,out=C11-7);
+    And(a=P8,b=C11-7,out=C11-8);
+    And(a=P7,b=C11-8,out=C11-9);
+
+    //('G5', 'P10', 'P9', 'P8', 'P7', 'P6')
+    And(a=G5,b=P10,out=C11-10);
+    And(a=P9,b=C11-10,out=C11-11);
+    And(a=P8,b=C11-11,out=C11-12);
+    And(a=P7,b=C11-12,out=C11-13);
+    And(a=P6,b=C11-13,out=C11-14);
+
+    //('G4', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5')
+    And(a=G4,b=P10,out=C11-15);
+    And(a=P9,b=C11-15,out=C11-16);
+    And(a=P8,b=C11-16,out=C11-17);
+    And(a=P7,b=C11-17,out=C11-18);
+    And(a=P6,b=C11-18,out=C11-19);
+    And(a=P5,b=C11-19,out=C11-20);
+
+    //('G3', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4')
+    And(a=G3,b=P10,out=C11-21);
+    And(a=P9,b=C11-21,out=C11-22);
+    And(a=P8,b=C11-22,out=C11-23);
+    And(a=P7,b=C11-23,out=C11-24);
+    And(a=P6,b=C11-24,out=C11-25);
+    And(a=P5,b=C11-25,out=C11-26);
+    And(a=P4,b=C11-26,out=C11-27);
+
+    //('G2', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3')
+    And(a=G2,b=P10,out=C11-28);
+    And(a=P9,b=C11-28,out=C11-29);
+    And(a=P8,b=C11-29,out=C11-30);
+    And(a=P7,b=C11-30,out=C11-31);
+    And(a=P6,b=C11-31,out=C11-32);
+    And(a=P5,b=C11-32,out=C11-33);
+    And(a=P4,b=C11-33,out=C11-34);
+    And(a=P3,b=C11-34,out=C11-35);
+
+    //('G1', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P10,out=C11-36);
+    And(a=P9,b=C11-36,out=C11-37);
+    And(a=P8,b=C11-37,out=C11-38);
+    And(a=P7,b=C11-38,out=C11-39);
+    And(a=P6,b=C11-39,out=C11-40);
+    And(a=P5,b=C11-40,out=C11-41);
+    And(a=P4,b=C11-41,out=C11-42);
+    And(a=P3,b=C11-42,out=C11-43);
+    And(a=P2,b=C11-43,out=C11-44);
+
+    //('G0', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P10,out=C11-45);
+    And(a=P9,b=C11-45,out=C11-46);
+    And(a=P8,b=C11-46,out=C11-47);
+    And(a=P7,b=C11-47,out=C11-48);
+    And(a=P6,b=C11-48,out=C11-49);
+    And(a=P5,b=C11-49,out=C11-50);
+    And(a=P4,b=C11-50,out=C11-51);
+    And(a=P3,b=C11-51,out=C11-52);
+    And(a=P2,b=C11-52,out=C11-53);
+    And(a=P1,b=C11-53,out=C11-54);
+
+    //('Cin', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P10,out=C11-55);
+    And(a=P9,b=C11-55,out=C11-56);
+    And(a=P8,b=C11-56,out=C11-57);
+    And(a=P7,b=C11-57,out=C11-58);
+    And(a=P6,b=C11-58,out=C11-59);
+    And(a=P5,b=C11-59,out=C11-60);
+    And(a=P4,b=C11-60,out=C11-61);
+    And(a=P3,b=C11-61,out=C11-62);
+    And(a=P2,b=C11-62,out=C11-63);
+    And(a=P1,b=C11-63,out=C11-64);
+    And(a=P0,b=C11-64,out=C11-65);
+
+    //('C11-0', 'C11-2', 'C11-5', 'C11-9', 'C11-14', 'C11-20', 'C11-27', 'C11-35', 'C11-44', 'C11-54', 'C11-65', 'G10')
+    Or(a=C11-0,b=C11-2,out=C11-66);
+    Or(a=C11-5,b=C11-66,out=C11-67);
+    Or(a=C11-9,b=C11-67,out=C11-68);
+    Or(a=C11-14,b=C11-68,out=C11-69);
+    Or(a=C11-20,b=C11-69,out=C11-70);
+    Or(a=C11-27,b=C11-70,out=C11-71);
+    Or(a=C11-35,b=C11-71,out=C11-72);
+    Or(a=C11-44,b=C11-72,out=C11-73);
+    Or(a=C11-54,b=C11-73,out=C11-74);
+    Or(a=C11-65,b=C11-74,out=C11-75);
+    Or(a=G10,b=C11-75,out=C11);
+    //C12:
+    //('G10', 'P11')
+    And(a=G10,b=P11,out=C12-0);
+
+    //('G9', 'P11', 'P10')
+    And(a=G9,b=P11,out=C12-1);
+    And(a=P10,b=C12-1,out=C12-2);
+
+    //('G8', 'P11', 'P10', 'P9')
+    And(a=G8,b=P11,out=C12-3);
+    And(a=P10,b=C12-3,out=C12-4);
+    And(a=P9,b=C12-4,out=C12-5);
+
+    //('G7', 'P11', 'P10', 'P9', 'P8')
+    And(a=G7,b=P11,out=C12-6);
+    And(a=P10,b=C12-6,out=C12-7);
+    And(a=P9,b=C12-7,out=C12-8);
+    And(a=P8,b=C12-8,out=C12-9);
+
+    //('G6', 'P11', 'P10', 'P9', 'P8', 'P7')
+    And(a=G6,b=P11,out=C12-10);
+    And(a=P10,b=C12-10,out=C12-11);
+    And(a=P9,b=C12-11,out=C12-12);
+    And(a=P8,b=C12-12,out=C12-13);
+    And(a=P7,b=C12-13,out=C12-14);
+
+    //('G5', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6')
+    And(a=G5,b=P11,out=C12-15);
+    And(a=P10,b=C12-15,out=C12-16);
+    And(a=P9,b=C12-16,out=C12-17);
+    And(a=P8,b=C12-17,out=C12-18);
+    And(a=P7,b=C12-18,out=C12-19);
+    And(a=P6,b=C12-19,out=C12-20);
+
+    //('G4', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5')
+    And(a=G4,b=P11,out=C12-21);
+    And(a=P10,b=C12-21,out=C12-22);
+    And(a=P9,b=C12-22,out=C12-23);
+    And(a=P8,b=C12-23,out=C12-24);
+    And(a=P7,b=C12-24,out=C12-25);
+    And(a=P6,b=C12-25,out=C12-26);
+    And(a=P5,b=C12-26,out=C12-27);
+
+    //('G3', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4')
+    And(a=G3,b=P11,out=C12-28);
+    And(a=P10,b=C12-28,out=C12-29);
+    And(a=P9,b=C12-29,out=C12-30);
+    And(a=P8,b=C12-30,out=C12-31);
+    And(a=P7,b=C12-31,out=C12-32);
+    And(a=P6,b=C12-32,out=C12-33);
+    And(a=P5,b=C12-33,out=C12-34);
+    And(a=P4,b=C12-34,out=C12-35);
+
+    //('G2', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3')
+    And(a=G2,b=P11,out=C12-36);
+    And(a=P10,b=C12-36,out=C12-37);
+    And(a=P9,b=C12-37,out=C12-38);
+    And(a=P8,b=C12-38,out=C12-39);
+    And(a=P7,b=C12-39,out=C12-40);
+    And(a=P6,b=C12-40,out=C12-41);
+    And(a=P5,b=C12-41,out=C12-42);
+    And(a=P4,b=C12-42,out=C12-43);
+    And(a=P3,b=C12-43,out=C12-44);
+
+    //('G1', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P11,out=C12-45);
+    And(a=P10,b=C12-45,out=C12-46);
+    And(a=P9,b=C12-46,out=C12-47);
+    And(a=P8,b=C12-47,out=C12-48);
+    And(a=P7,b=C12-48,out=C12-49);
+    And(a=P6,b=C12-49,out=C12-50);
+    And(a=P5,b=C12-50,out=C12-51);
+    And(a=P4,b=C12-51,out=C12-52);
+    And(a=P3,b=C12-52,out=C12-53);
+    And(a=P2,b=C12-53,out=C12-54);
+
+    //('G0', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P11,out=C12-55);
+    And(a=P10,b=C12-55,out=C12-56);
+    And(a=P9,b=C12-56,out=C12-57);
+    And(a=P8,b=C12-57,out=C12-58);
+    And(a=P7,b=C12-58,out=C12-59);
+    And(a=P6,b=C12-59,out=C12-60);
+    And(a=P5,b=C12-60,out=C12-61);
+    And(a=P4,b=C12-61,out=C12-62);
+    And(a=P3,b=C12-62,out=C12-63);
+    And(a=P2,b=C12-63,out=C12-64);
+    And(a=P1,b=C12-64,out=C12-65);
+
+    //('Cin', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P11,out=C12-66);
+    And(a=P10,b=C12-66,out=C12-67);
+    And(a=P9,b=C12-67,out=C12-68);
+    And(a=P8,b=C12-68,out=C12-69);
+    And(a=P7,b=C12-69,out=C12-70);
+    And(a=P6,b=C12-70,out=C12-71);
+    And(a=P5,b=C12-71,out=C12-72);
+    And(a=P4,b=C12-72,out=C12-73);
+    And(a=P3,b=C12-73,out=C12-74);
+    And(a=P2,b=C12-74,out=C12-75);
+    And(a=P1,b=C12-75,out=C12-76);
+    And(a=P0,b=C12-76,out=C12-77);
+
+    //('C12-0', 'C12-2', 'C12-5', 'C12-9', 'C12-14', 'C12-20', 'C12-27', 'C12-35', 'C12-44', 'C12-54', 'C12-65', 'C12-77', 'G11')
+    Or(a=C12-0,b=C12-2,out=C12-78);
+    Or(a=C12-5,b=C12-78,out=C12-79);
+    Or(a=C12-9,b=C12-79,out=C12-80);
+    Or(a=C12-14,b=C12-80,out=C12-81);
+    Or(a=C12-20,b=C12-81,out=C12-82);
+    Or(a=C12-27,b=C12-82,out=C12-83);
+    Or(a=C12-35,b=C12-83,out=C12-84);
+    Or(a=C12-44,b=C12-84,out=C12-85);
+    Or(a=C12-54,b=C12-85,out=C12-86);
+    Or(a=C12-65,b=C12-86,out=C12-87);
+    Or(a=C12-77,b=C12-87,out=C12-88);
+    Or(a=G11,b=C12-88,out=C12);
+    //C13:
+    //('G11', 'P12')
+    And(a=G11,b=P12,out=C13-0);
+
+    //('G10', 'P12', 'P11')
+    And(a=G10,b=P12,out=C13-1);
+    And(a=P11,b=C13-1,out=C13-2);
+
+    //('G9', 'P12', 'P11', 'P10')
+    And(a=G9,b=P12,out=C13-3);
+    And(a=P11,b=C13-3,out=C13-4);
+    And(a=P10,b=C13-4,out=C13-5);
+
+    //('G8', 'P12', 'P11', 'P10', 'P9')
+    And(a=G8,b=P12,out=C13-6);
+    And(a=P11,b=C13-6,out=C13-7);
+    And(a=P10,b=C13-7,out=C13-8);
+    And(a=P9,b=C13-8,out=C13-9);
+
+    //('G7', 'P12', 'P11', 'P10', 'P9', 'P8')
+    And(a=G7,b=P12,out=C13-10);
+    And(a=P11,b=C13-10,out=C13-11);
+    And(a=P10,b=C13-11,out=C13-12);
+    And(a=P9,b=C13-12,out=C13-13);
+    And(a=P8,b=C13-13,out=C13-14);
+
+    //('G6', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7')
+    And(a=G6,b=P12,out=C13-15);
+    And(a=P11,b=C13-15,out=C13-16);
+    And(a=P10,b=C13-16,out=C13-17);
+    And(a=P9,b=C13-17,out=C13-18);
+    And(a=P8,b=C13-18,out=C13-19);
+    And(a=P7,b=C13-19,out=C13-20);
+
+    //('G5', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6')
+    And(a=G5,b=P12,out=C13-21);
+    And(a=P11,b=C13-21,out=C13-22);
+    And(a=P10,b=C13-22,out=C13-23);
+    And(a=P9,b=C13-23,out=C13-24);
+    And(a=P8,b=C13-24,out=C13-25);
+    And(a=P7,b=C13-25,out=C13-26);
+    And(a=P6,b=C13-26,out=C13-27);
+
+    //('G4', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5')
+    And(a=G4,b=P12,out=C13-28);
+    And(a=P11,b=C13-28,out=C13-29);
+    And(a=P10,b=C13-29,out=C13-30);
+    And(a=P9,b=C13-30,out=C13-31);
+    And(a=P8,b=C13-31,out=C13-32);
+    And(a=P7,b=C13-32,out=C13-33);
+    And(a=P6,b=C13-33,out=C13-34);
+    And(a=P5,b=C13-34,out=C13-35);
+
+    //('G3', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4')
+    And(a=G3,b=P12,out=C13-36);
+    And(a=P11,b=C13-36,out=C13-37);
+    And(a=P10,b=C13-37,out=C13-38);
+    And(a=P9,b=C13-38,out=C13-39);
+    And(a=P8,b=C13-39,out=C13-40);
+    And(a=P7,b=C13-40,out=C13-41);
+    And(a=P6,b=C13-41,out=C13-42);
+    And(a=P5,b=C13-42,out=C13-43);
+    And(a=P4,b=C13-43,out=C13-44);
+
+    //('G2', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3')
+    And(a=G2,b=P12,out=C13-45);
+    And(a=P11,b=C13-45,out=C13-46);
+    And(a=P10,b=C13-46,out=C13-47);
+    And(a=P9,b=C13-47,out=C13-48);
+    And(a=P8,b=C13-48,out=C13-49);
+    And(a=P7,b=C13-49,out=C13-50);
+    And(a=P6,b=C13-50,out=C13-51);
+    And(a=P5,b=C13-51,out=C13-52);
+    And(a=P4,b=C13-52,out=C13-53);
+    And(a=P3,b=C13-53,out=C13-54);
+
+    //('G1', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P12,out=C13-55);
+    And(a=P11,b=C13-55,out=C13-56);
+    And(a=P10,b=C13-56,out=C13-57);
+    And(a=P9,b=C13-57,out=C13-58);
+    And(a=P8,b=C13-58,out=C13-59);
+    And(a=P7,b=C13-59,out=C13-60);
+    And(a=P6,b=C13-60,out=C13-61);
+    And(a=P5,b=C13-61,out=C13-62);
+    And(a=P4,b=C13-62,out=C13-63);
+    And(a=P3,b=C13-63,out=C13-64);
+    And(a=P2,b=C13-64,out=C13-65);
+
+    //('G0', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P12,out=C13-66);
+    And(a=P11,b=C13-66,out=C13-67);
+    And(a=P10,b=C13-67,out=C13-68);
+    And(a=P9,b=C13-68,out=C13-69);
+    And(a=P8,b=C13-69,out=C13-70);
+    And(a=P7,b=C13-70,out=C13-71);
+    And(a=P6,b=C13-71,out=C13-72);
+    And(a=P5,b=C13-72,out=C13-73);
+    And(a=P4,b=C13-73,out=C13-74);
+    And(a=P3,b=C13-74,out=C13-75);
+    And(a=P2,b=C13-75,out=C13-76);
+    And(a=P1,b=C13-76,out=C13-77);
+
+    //('Cin', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P12,out=C13-78);
+    And(a=P11,b=C13-78,out=C13-79);
+    And(a=P10,b=C13-79,out=C13-80);
+    And(a=P9,b=C13-80,out=C13-81);
+    And(a=P8,b=C13-81,out=C13-82);
+    And(a=P7,b=C13-82,out=C13-83);
+    And(a=P6,b=C13-83,out=C13-84);
+    And(a=P5,b=C13-84,out=C13-85);
+    And(a=P4,b=C13-85,out=C13-86);
+    And(a=P3,b=C13-86,out=C13-87);
+    And(a=P2,b=C13-87,out=C13-88);
+    And(a=P1,b=C13-88,out=C13-89);
+    And(a=P0,b=C13-89,out=C13-90);
+
+    //('C13-0', 'C13-2', 'C13-5', 'C13-9', 'C13-14', 'C13-20', 'C13-27', 'C13-35', 'C13-44', 'C13-54', 'C13-65', 'C13-77', 'C13-90', 'G12')
+    Or(a=C13-0,b=C13-2,out=C13-91);
+    Or(a=C13-5,b=C13-91,out=C13-92);
+    Or(a=C13-9,b=C13-92,out=C13-93);
+    Or(a=C13-14,b=C13-93,out=C13-94);
+    Or(a=C13-20,b=C13-94,out=C13-95);
+    Or(a=C13-27,b=C13-95,out=C13-96);
+    Or(a=C13-35,b=C13-96,out=C13-97);
+    Or(a=C13-44,b=C13-97,out=C13-98);
+    Or(a=C13-54,b=C13-98,out=C13-99);
+    Or(a=C13-65,b=C13-99,out=C13-100);
+    Or(a=C13-77,b=C13-100,out=C13-101);
+    Or(a=C13-90,b=C13-101,out=C13-102);
+    Or(a=G12,b=C13-102,out=C13);
+    //C14:
+    //('G12', 'P13')
+    And(a=G12,b=P13,out=C14-0);
+
+    //('G11', 'P13', 'P12')
+    And(a=G11,b=P13,out=C14-1);
+    And(a=P12,b=C14-1,out=C14-2);
+
+    //('G10', 'P13', 'P12', 'P11')
+    And(a=G10,b=P13,out=C14-3);
+    And(a=P12,b=C14-3,out=C14-4);
+    And(a=P11,b=C14-4,out=C14-5);
+
+    //('G9', 'P13', 'P12', 'P11', 'P10')
+    And(a=G9,b=P13,out=C14-6);
+    And(a=P12,b=C14-6,out=C14-7);
+    And(a=P11,b=C14-7,out=C14-8);
+    And(a=P10,b=C14-8,out=C14-9);
+
+    //('G8', 'P13', 'P12', 'P11', 'P10', 'P9')
+    And(a=G8,b=P13,out=C14-10);
+    And(a=P12,b=C14-10,out=C14-11);
+    And(a=P11,b=C14-11,out=C14-12);
+    And(a=P10,b=C14-12,out=C14-13);
+    And(a=P9,b=C14-13,out=C14-14);
+
+    //('G7', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8')
+    And(a=G7,b=P13,out=C14-15);
+    And(a=P12,b=C14-15,out=C14-16);
+    And(a=P11,b=C14-16,out=C14-17);
+    And(a=P10,b=C14-17,out=C14-18);
+    And(a=P9,b=C14-18,out=C14-19);
+    And(a=P8,b=C14-19,out=C14-20);
+
+    //('G6', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7')
+    And(a=G6,b=P13,out=C14-21);
+    And(a=P12,b=C14-21,out=C14-22);
+    And(a=P11,b=C14-22,out=C14-23);
+    And(a=P10,b=C14-23,out=C14-24);
+    And(a=P9,b=C14-24,out=C14-25);
+    And(a=P8,b=C14-25,out=C14-26);
+    And(a=P7,b=C14-26,out=C14-27);
+
+    //('G5', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6')
+    And(a=G5,b=P13,out=C14-28);
+    And(a=P12,b=C14-28,out=C14-29);
+    And(a=P11,b=C14-29,out=C14-30);
+    And(a=P10,b=C14-30,out=C14-31);
+    And(a=P9,b=C14-31,out=C14-32);
+    And(a=P8,b=C14-32,out=C14-33);
+    And(a=P7,b=C14-33,out=C14-34);
+    And(a=P6,b=C14-34,out=C14-35);
+
+    //('G4', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5')
+    And(a=G4,b=P13,out=C14-36);
+    And(a=P12,b=C14-36,out=C14-37);
+    And(a=P11,b=C14-37,out=C14-38);
+    And(a=P10,b=C14-38,out=C14-39);
+    And(a=P9,b=C14-39,out=C14-40);
+    And(a=P8,b=C14-40,out=C14-41);
+    And(a=P7,b=C14-41,out=C14-42);
+    And(a=P6,b=C14-42,out=C14-43);
+    And(a=P5,b=C14-43,out=C14-44);
+
+    //('G3', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4')
+    And(a=G3,b=P13,out=C14-45);
+    And(a=P12,b=C14-45,out=C14-46);
+    And(a=P11,b=C14-46,out=C14-47);
+    And(a=P10,b=C14-47,out=C14-48);
+    And(a=P9,b=C14-48,out=C14-49);
+    And(a=P8,b=C14-49,out=C14-50);
+    And(a=P7,b=C14-50,out=C14-51);
+    And(a=P6,b=C14-51,out=C14-52);
+    And(a=P5,b=C14-52,out=C14-53);
+    And(a=P4,b=C14-53,out=C14-54);
+
+    //('G2', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3')
+    And(a=G2,b=P13,out=C14-55);
+    And(a=P12,b=C14-55,out=C14-56);
+    And(a=P11,b=C14-56,out=C14-57);
+    And(a=P10,b=C14-57,out=C14-58);
+    And(a=P9,b=C14-58,out=C14-59);
+    And(a=P8,b=C14-59,out=C14-60);
+    And(a=P7,b=C14-60,out=C14-61);
+    And(a=P6,b=C14-61,out=C14-62);
+    And(a=P5,b=C14-62,out=C14-63);
+    And(a=P4,b=C14-63,out=C14-64);
+    And(a=P3,b=C14-64,out=C14-65);
+
+    //('G1', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P13,out=C14-66);
+    And(a=P12,b=C14-66,out=C14-67);
+    And(a=P11,b=C14-67,out=C14-68);
+    And(a=P10,b=C14-68,out=C14-69);
+    And(a=P9,b=C14-69,out=C14-70);
+    And(a=P8,b=C14-70,out=C14-71);
+    And(a=P7,b=C14-71,out=C14-72);
+    And(a=P6,b=C14-72,out=C14-73);
+    And(a=P5,b=C14-73,out=C14-74);
+    And(a=P4,b=C14-74,out=C14-75);
+    And(a=P3,b=C14-75,out=C14-76);
+    And(a=P2,b=C14-76,out=C14-77);
+
+    //('G0', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P13,out=C14-78);
+    And(a=P12,b=C14-78,out=C14-79);
+    And(a=P11,b=C14-79,out=C14-80);
+    And(a=P10,b=C14-80,out=C14-81);
+    And(a=P9,b=C14-81,out=C14-82);
+    And(a=P8,b=C14-82,out=C14-83);
+    And(a=P7,b=C14-83,out=C14-84);
+    And(a=P6,b=C14-84,out=C14-85);
+    And(a=P5,b=C14-85,out=C14-86);
+    And(a=P4,b=C14-86,out=C14-87);
+    And(a=P3,b=C14-87,out=C14-88);
+    And(a=P2,b=C14-88,out=C14-89);
+    And(a=P1,b=C14-89,out=C14-90);
+
+    //('Cin', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P13,out=C14-91);
+    And(a=P12,b=C14-91,out=C14-92);
+    And(a=P11,b=C14-92,out=C14-93);
+    And(a=P10,b=C14-93,out=C14-94);
+    And(a=P9,b=C14-94,out=C14-95);
+    And(a=P8,b=C14-95,out=C14-96);
+    And(a=P7,b=C14-96,out=C14-97);
+    And(a=P6,b=C14-97,out=C14-98);
+    And(a=P5,b=C14-98,out=C14-99);
+    And(a=P4,b=C14-99,out=C14-100);
+    And(a=P3,b=C14-100,out=C14-101);
+    And(a=P2,b=C14-101,out=C14-102);
+    And(a=P1,b=C14-102,out=C14-103);
+    And(a=P0,b=C14-103,out=C14-104);
+
+    //('C14-0', 'C14-2', 'C14-5', 'C14-9', 'C14-14', 'C14-20', 'C14-27', 'C14-35', 'C14-44', 'C14-54', 'C14-65', 'C14-77', 'C14-90', 'C14-104', 'G13')
+    Or(a=C14-0,b=C14-2,out=C14-105);
+    Or(a=C14-5,b=C14-105,out=C14-106);
+    Or(a=C14-9,b=C14-106,out=C14-107);
+    Or(a=C14-14,b=C14-107,out=C14-108);
+    Or(a=C14-20,b=C14-108,out=C14-109);
+    Or(a=C14-27,b=C14-109,out=C14-110);
+    Or(a=C14-35,b=C14-110,out=C14-111);
+    Or(a=C14-44,b=C14-111,out=C14-112);
+    Or(a=C14-54,b=C14-112,out=C14-113);
+    Or(a=C14-65,b=C14-113,out=C14-114);
+    Or(a=C14-77,b=C14-114,out=C14-115);
+    Or(a=C14-90,b=C14-115,out=C14-116);
+    Or(a=C14-104,b=C14-116,out=C14-117);
+    Or(a=G13,b=C14-117,out=C14);
+    //C15:
+    //('G13', 'P14')
+    And(a=G13,b=P14,out=C15-0);
+
+    //('G12', 'P14', 'P13')
+    And(a=G12,b=P14,out=C15-1);
+    And(a=P13,b=C15-1,out=C15-2);
+
+    //('G11', 'P14', 'P13', 'P12')
+    And(a=G11,b=P14,out=C15-3);
+    And(a=P13,b=C15-3,out=C15-4);
+    And(a=P12,b=C15-4,out=C15-5);
+
+    //('G10', 'P14', 'P13', 'P12', 'P11')
+    And(a=G10,b=P14,out=C15-6);
+    And(a=P13,b=C15-6,out=C15-7);
+    And(a=P12,b=C15-7,out=C15-8);
+    And(a=P11,b=C15-8,out=C15-9);
+
+    //('G9', 'P14', 'P13', 'P12', 'P11', 'P10')
+    And(a=G9,b=P14,out=C15-10);
+    And(a=P13,b=C15-10,out=C15-11);
+    And(a=P12,b=C15-11,out=C15-12);
+    And(a=P11,b=C15-12,out=C15-13);
+    And(a=P10,b=C15-13,out=C15-14);
+
+    //('G8', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9')
+    And(a=G8,b=P14,out=C15-15);
+    And(a=P13,b=C15-15,out=C15-16);
+    And(a=P12,b=C15-16,out=C15-17);
+    And(a=P11,b=C15-17,out=C15-18);
+    And(a=P10,b=C15-18,out=C15-19);
+    And(a=P9,b=C15-19,out=C15-20);
+
+    //('G7', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8')
+    And(a=G7,b=P14,out=C15-21);
+    And(a=P13,b=C15-21,out=C15-22);
+    And(a=P12,b=C15-22,out=C15-23);
+    And(a=P11,b=C15-23,out=C15-24);
+    And(a=P10,b=C15-24,out=C15-25);
+    And(a=P9,b=C15-25,out=C15-26);
+    And(a=P8,b=C15-26,out=C15-27);
+
+    //('G6', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7')
+    And(a=G6,b=P14,out=C15-28);
+    And(a=P13,b=C15-28,out=C15-29);
+    And(a=P12,b=C15-29,out=C15-30);
+    And(a=P11,b=C15-30,out=C15-31);
+    And(a=P10,b=C15-31,out=C15-32);
+    And(a=P9,b=C15-32,out=C15-33);
+    And(a=P8,b=C15-33,out=C15-34);
+    And(a=P7,b=C15-34,out=C15-35);
+
+    //('G5', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6')
+    And(a=G5,b=P14,out=C15-36);
+    And(a=P13,b=C15-36,out=C15-37);
+    And(a=P12,b=C15-37,out=C15-38);
+    And(a=P11,b=C15-38,out=C15-39);
+    And(a=P10,b=C15-39,out=C15-40);
+    And(a=P9,b=C15-40,out=C15-41);
+    And(a=P8,b=C15-41,out=C15-42);
+    And(a=P7,b=C15-42,out=C15-43);
+    And(a=P6,b=C15-43,out=C15-44);
+
+    //('G4', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5')
+    And(a=G4,b=P14,out=C15-45);
+    And(a=P13,b=C15-45,out=C15-46);
+    And(a=P12,b=C15-46,out=C15-47);
+    And(a=P11,b=C15-47,out=C15-48);
+    And(a=P10,b=C15-48,out=C15-49);
+    And(a=P9,b=C15-49,out=C15-50);
+    And(a=P8,b=C15-50,out=C15-51);
+    And(a=P7,b=C15-51,out=C15-52);
+    And(a=P6,b=C15-52,out=C15-53);
+    And(a=P5,b=C15-53,out=C15-54);
+
+    //('G3', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4')
+    And(a=G3,b=P14,out=C15-55);
+    And(a=P13,b=C15-55,out=C15-56);
+    And(a=P12,b=C15-56,out=C15-57);
+    And(a=P11,b=C15-57,out=C15-58);
+    And(a=P10,b=C15-58,out=C15-59);
+    And(a=P9,b=C15-59,out=C15-60);
+    And(a=P8,b=C15-60,out=C15-61);
+    And(a=P7,b=C15-61,out=C15-62);
+    And(a=P6,b=C15-62,out=C15-63);
+    And(a=P5,b=C15-63,out=C15-64);
+    And(a=P4,b=C15-64,out=C15-65);
+
+    //('G2', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3')
+    And(a=G2,b=P14,out=C15-66);
+    And(a=P13,b=C15-66,out=C15-67);
+    And(a=P12,b=C15-67,out=C15-68);
+    And(a=P11,b=C15-68,out=C15-69);
+    And(a=P10,b=C15-69,out=C15-70);
+    And(a=P9,b=C15-70,out=C15-71);
+    And(a=P8,b=C15-71,out=C15-72);
+    And(a=P7,b=C15-72,out=C15-73);
+    And(a=P6,b=C15-73,out=C15-74);
+    And(a=P5,b=C15-74,out=C15-75);
+    And(a=P4,b=C15-75,out=C15-76);
+    And(a=P3,b=C15-76,out=C15-77);
+
+    //('G1', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2')
+    And(a=G1,b=P14,out=C15-78);
+    And(a=P13,b=C15-78,out=C15-79);
+    And(a=P12,b=C15-79,out=C15-80);
+    And(a=P11,b=C15-80,out=C15-81);
+    And(a=P10,b=C15-81,out=C15-82);
+    And(a=P9,b=C15-82,out=C15-83);
+    And(a=P8,b=C15-83,out=C15-84);
+    And(a=P7,b=C15-84,out=C15-85);
+    And(a=P6,b=C15-85,out=C15-86);
+    And(a=P5,b=C15-86,out=C15-87);
+    And(a=P4,b=C15-87,out=C15-88);
+    And(a=P3,b=C15-88,out=C15-89);
+    And(a=P2,b=C15-89,out=C15-90);
+
+    //('G0', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1')
+    And(a=G0,b=P14,out=C15-91);
+    And(a=P13,b=C15-91,out=C15-92);
+    And(a=P12,b=C15-92,out=C15-93);
+    And(a=P11,b=C15-93,out=C15-94);
+    And(a=P10,b=C15-94,out=C15-95);
+    And(a=P9,b=C15-95,out=C15-96);
+    And(a=P8,b=C15-96,out=C15-97);
+    And(a=P7,b=C15-97,out=C15-98);
+    And(a=P6,b=C15-98,out=C15-99);
+    And(a=P5,b=C15-99,out=C15-100);
+    And(a=P4,b=C15-100,out=C15-101);
+    And(a=P3,b=C15-101,out=C15-102);
+    And(a=P2,b=C15-102,out=C15-103);
+    And(a=P1,b=C15-103,out=C15-104);
+
+    //('Cin', 'P14', 'P13', 'P12', 'P11', 'P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1', 'P0')
+    And(a=Cin,b=P14,out=C15-105);
+    And(a=P13,b=C15-105,out=C15-106);
+    And(a=P12,b=C15-106,out=C15-107);
+    And(a=P11,b=C15-107,out=C15-108);
+    And(a=P10,b=C15-108,out=C15-109);
+    And(a=P9,b=C15-109,out=C15-110);
+    And(a=P8,b=C15-110,out=C15-111);
+    And(a=P7,b=C15-111,out=C15-112);
+    And(a=P6,b=C15-112,out=C15-113);
+    And(a=P5,b=C15-113,out=C15-114);
+    And(a=P4,b=C15-114,out=C15-115);
+    And(a=P3,b=C15-115,out=C15-116);
+    And(a=P2,b=C15-116,out=C15-117);
+    And(a=P1,b=C15-117,out=C15-118);
+    And(a=P0,b=C15-118,out=C15-119);
+
+    //('C15-0', 'C15-2', 'C15-5', 'C15-9', 'C15-14', 'C15-20', 'C15-27', 'C15-35', 'C15-44', 'C15-54', 'C15-65', 'C15-77', 'C15-90', 'C15-104', 'C15-119', 'G14')
+    Or(a=C15-0,b=C15-2,out=C15-120);
+    Or(a=C15-5,b=C15-120,out=C15-121);
+    Or(a=C15-9,b=C15-121,out=C15-122);
+    Or(a=C15-14,b=C15-122,out=C15-123);
+    Or(a=C15-20,b=C15-123,out=C15-124);
+    Or(a=C15-27,b=C15-124,out=C15-125);
+    Or(a=C15-35,b=C15-125,out=C15-126);
+    Or(a=C15-44,b=C15-126,out=C15-127);
+    Or(a=C15-54,b=C15-127,out=C15-128);
+    Or(a=C15-65,b=C15-128,out=C15-129);
+    Or(a=C15-77,b=C15-129,out=C15-130);
+    Or(a=C15-90,b=C15-130,out=C15-131);
+    Or(a=C15-104,b=C15-131,out=C15-132);
+    Or(a=C15-119,b=C15-132,out=C15-133);
+    Or(a=G14,b=C15-133,out=C15);
     FullAdder(a=a[0], b=b[0], c=false, sum=out[0], carry=false);
     FullAdder(a=a[1], b=b[1], c=C1, sum=out[1], carry=false);
     FullAdder(a=a[2], b=b[2], c=C2, sum=out[2], carry=false);
@@ -115,20 +1127,5 @@ CHIP Add16 {
     FullAdder(a=a[12], b=b[12], c=C12, sum=out[12], carry=false);
     FullAdder(a=a[13], b=b[13], c=C13, sum=out[13], carry=false);
     FullAdder(a=a[14], b=b[14], c=C14, sum=out[14], carry=false);
-    FullAdder(a=a[15], b=b[15], c=C15, sum=out[15], carry=cout);
-
-
-
-    // FullAdder(a=a[0], b=b[0], c=C1, sum=out[0], carry=false)
-    // FullAdder(a=a[1], b=b[1], c=C2, sum=out[1], carry=false)
-    // FullAdder(a=a[2], b=b[2], c=C3, sum=out[2], carry=false)
-    // FullAdder(a=a[3], b=b[3], c=C4, sum=out[3], carry=false)
-    
-
-
-
-
-
-
-    
+    FullAdder(a=a[15], b=b[15], c=C15, sum=out[15], carry=C16);
 }
